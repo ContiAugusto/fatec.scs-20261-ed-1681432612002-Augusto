@@ -1,159 +1,66 @@
-'''
-*---------------------------------------------------------*
-*              Fatec São Caetano do Sul                   *
-*         Exemplo de Manipulação de Lista Ligada          *
-* Autor: Eduardo Sim                                      *
-* Objetivo: Mostrar manipulação de lista ligada em python *
-* Data: 09/03/2026                                        *
-*---------------------------------------------------------*
-'''
+"""
+-------------------------------------
+        FATEC ANTONIO RUSSO
+            atividade 01(B1)
+        autor: Augusto Conti
+  Objetivo: Utilizar estrutura de
+     dados Dicionário em python
+        data: 25/02/2026
+-------------------------------------
+"""
+catalogo = {}
 
-X = 0.0
-Y = 0.0
-Z = 0.0
-T = 0.0
 
-def mostrar_pilha(acao):
-    print(f"  {acao:<35} T={T:.2f}  Z={Z:.2f}  Y={Y:.2f}  X={X:.2f}")
+def adicionar_filme(id_para_adicionar, titulo, diretor):
+    if catalogo.get(id_para_adicionar) is None:
+        catalogo[id_para_adicionar] = {
+            "titulo": titulo,
+            "diretor": diretor
+        }
+        print(f"Filme '{titulo}' adicionado com sucesso!")
+        return
+    print(f"Já existe um filme com o ID: {id_para_adicionar}")
 
-def push(valor):
-    global X, Y, Z, T
-    T = Z
-    Z = Y
-    Y = X
-    X = valor
 
-def pop():
-    global X, Y, Z, T
-    valor = X
-    X = Y
-    Y = Z
-    Z = T
-    return valor
+def buscar_filme(id_para_buscar):
+    filme = catalogo.get(id_para_buscar)
+    if filme is None:
+        print(f"Não existe um filme com o ID: {id_para_buscar}")
+        return None
+    return filme
 
-def validar_expressao(tokens):
-    operadores = ["+", "-", "*", "/"]
-    contador = 0
 
-    if len(tokens) == 0:
-        print("ERRO: A expressão está vazia")
-        return False
-
-    for token in tokens:
-        if token in operadores:
-            if contador < 2:
-                print(f"ERRO: O operador '{token}' não tem operandos suficientes")
-                return False
-            contador = contador - 1
-        else:
-            try:
-                float(token)
-                contador = contador + 1
-            except ValueError:
-                print(f"ERRO: '{token}' não é um número nem um operador válido")
-                return False
-
-    if contador != 1:
-        print(f"ERRO: A expressão ficou desequilibrada, sobraram {contador} valores.")
-        return False
-
-    return True
-
-def converter_para_infixa(tokens):
-    operadores = ["+", "-", "*", "/"]
-    pilha_infixa = []
-
-    for token in tokens:
-        if token in operadores:
-            b = pilha_infixa.pop()
-            a = pilha_infixa.pop()
-            expressao = "(" + a + " " + token + " " + b + ")"
-            pilha_infixa.append(expressao)
-        else:
-            numero = float(token)
-            if numero == int(numero):
-                pilha_infixa.append(str(int(numero)))
-            else:
-                pilha_infixa.append(str(numero))
-
-    resultado = pilha_infixa[0]
-    if resultado[0] == "(" and resultado[-1] == ")":
-        resultado = resultado[1:-1]
-
-    return resultado
-
-def calcular_rpn(expressao):
-    global X, Y, Z, T
-
-    X = 0.0
-    Y = 0.0
-    Z = 0.0
-    T = 0.0
-
-    tokens = expressao.strip().split()
-
-    if not validar_expressao(tokens):
+def remover_filme(id_para_remover):
+    if id_para_remover not in catalogo:
+        print(f"Não existe um filme com o ID: {id_para_remover}")
         return
 
-    operadores = ["+", "-", "*", "/"]
+    titulo = catalogo[id_para_remover]["titulo"]
+    del catalogo[id_para_remover]
+    print(f"O filme '{titulo}' foi deletado.")
 
-    print()
-    print(f"  {'AÇÃO':<35} {'T':>6}  {'Z':>6}  {'Y':>6}  {'X':>8}")
-    print("-" * 70)
 
-    for token in tokens:
+def listar_todos():
+    if not catalogo:
+        print("O catalogo está vazio.")
+    else:
+        print("\n--- Listagem de Filmes ---")
+        for id_atual, dados in catalogo.items():
+            print(f"ID: {id_atual} | Título: {dados['titulo']} | Diretor: {dados['diretor']}")
+        print("--------------------------\n")
 
-        if token not in operadores:
-            push(float(token))
-            mostrar_pilha("ENTER " + token)
 
-        else:
-            b = pop()
-            a = pop()
+id_do_filme = 1
 
-            resultado = 0.0
+adicionar_filme(id_do_filme, "Norbit", "Augusto Conti")
+adicionar_filme(2, "Interstellar", "Eduardo Sim")
 
-            if token == "+":
-                resultado = a + b
-            elif token == "-":
-                resultado = a - b
-            elif token == "*":
-                resultado = a * b
-            elif token == "/":
-                if b == 0:
-                    print("ERRO: Divisão por zero")
-                    return
-                resultado = a / b
+listar_todos()
 
-            push(resultado)
-            mostrar_pilha("OP " + token + "  (" + str(a) + " " + token + " " + str(b) + " = " + str(resultado) + ")")
+filme_encontrado = buscar_filme(id_do_filme)
+if filme_encontrado:
+    print(f"Filme encontrado: {filme_encontrado['titulo']}")
 
-    notacao_infixa = converter_para_infixa(tokens)
+remover_filme(id_do_filme)
 
-    print()
-    print("  Expressão RPN digitada : " + expressao)
-    print("  Notação Infixa         : " + notacao_infixa)
-    print()
-    print("  O resultado da expressão algébrica é: " + str(X))
-    print()
-
-print("  Operadores aceitos: +  -  *  /")
-print("  Exemplo de entrada: 5 1 2 + 4 * + 3 -")
-print("  Digite 'sair' para encerrar o programa.")
-print()
-
-# Loop principal do programa
-while True:
-    entrada = input("  Digite a expressão RPN: ")
-
-    if entrada.lower() == "sair":
-        print()
-        print("  Programa encerrado.")
-        print()
-        break
-
-    if entrada.strip() == "":
-        print("  Por favor, digite uma expressão.")
-        continue
-
-    calcular_rpn(entrada)
+listar_todos()
